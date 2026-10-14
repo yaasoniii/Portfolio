@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -14,6 +15,7 @@ const canvas = document.getElementById('gl');
 const cssHost = document.getElementById('css3d');
 const backBtn = document.getElementById('back');
 const params = new URLSearchParams(location.search);
+const MAX_DT = Number(params.get('maxdt')) || 0.05; // frame-time clamp (raise only for slow test renderers)
 const LOW = params.has('low') || matchMedia('(pointer: coarse)').matches;
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
@@ -73,8 +75,27 @@ function computeZoomView() {
   zoomView = { pos: center.clone().addScaledVector(normal, dist), look: center };
 }
 
-let zoomed = false, t = 0; // t: 0 overview → 1 zoomed
-const mouse = new THREE.Vector2(), mouseS = new THREE.Vector2();
+// --- free look: drag to orbit, wheel / pinch to zoom, right-drag (or two fingers) to pan ---
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.rotateSpeed = 0.7;
+controls.zoomSpeed = 0.8;
+controls.minDistance = 0.9;
+controls.maxDistance = 9.5;
+controls.minPolarAngle = 0.25;
+controls.maxPolarAngle = Math.PI * 0.49;     // never dip below the floor
+controls.minAzimuthAngle = -0.6;             // stay on the open side of the room
+controls.maxAzimuthAngle = 1.0;
+controls.screenSpacePanning = true;
+controls.zoomToCursor = true;
+controls.target.copy(overview.look);
+const PAN_BOX = { min: new THREE.Vector3(-2.4, 0.25, -2.1), max: new THREE.Vector3(2.4, 2.0, 2.2) };
+controls.addEventListener('change', () => controls.target.clamp(PAN_BOX.min, PAN_BOX.max));
+canvas.style.touchAction = 'none';
+
+let zoomed = false, t = 0; // t: 0 free-look → 1 sitting at the laptop
+const rest = { pos: new THREE.Vector3(), look: new THREE.Vector3() }; // where to return to
 const curPos = new THREE.Vector3(), curLook = new THREE.Vector3();
 
 function resize() {
@@ -91,10 +112,17 @@ function resize() {
 addEventListener('resize', resize);
 
 function setZoom(z) {
+  if (z === zoomed) return;
   zoomed = z;
   document.body.classList.toggle('zoomed', z);
   backBtn.hidden = !z;
-  if (!z) document.body.style.cursor = '';
+  if (z) {
+    rest.pos.copy(camera.position);
+    rest.look.copy(controls.target);
+    controls.enabled = false;
+  } else {
+    document.body.style.cursor = '';
+  }
 }
 // generous invisible hit-target around the laptop so it's easy to click
 const hitProxy = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.34, 0.36), new THREE.MeshBasicMaterial());
@@ -106,35 +134,51 @@ function overLaptop(e) {
   raycaster.setFromCamera(new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1), camera);
   return raycaster.intersectObject(laptop, true).length > 0;
 }
+let down = null;
+canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; document.body.classList.add('dragging'); });
+addEventListener('pointerup', () => document.body.classList.remove('dragging'));
 canvas.addEventListener('pointermove', (e) => {
-  mouse.set((e.clientX / innerWidth) * 2 - 1, (e.clientY / innerHeight) * 2 - 1);
-  document.body.classList.toggle('hover-laptop', !zoomed && overLaptop(e));
+  if (!zoomed && !down) document.body.classList.toggle('hover-laptop', overLaptop(e));
 });
-canvas.addEventListener('click', (e) => { if (!zoomed && overLaptop(e)) setZoom(true); });
-canvas.addEventListener('wheel', (e) => { if (!zoomed && e.deltaY < 0) setZoom(true); }, { passive: true });
+canvas.addEventListener('click', (e) => {
+  const wasDrag = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5; // dragging to orbit isn't a click
+  down = null;
+  if (!zoomed && !wasDrag && overLaptop(e)) setZoom(true);
+});
+if (params.has('debug')) window.__laptopXY = () => {
+  const v = laptop.localToWorld(new THREE.Vector3(0, 0.1, 0)).project(camera);
+  return { x: (v.x + 1) / 2 * innerWidth, y: (1 - v.y) / 2 * innerHeight };
+};
 backBtn.addEventListener('click', () => setZoom(false));
 addEventListener('keydown', (e) => { if (e.key === 'Escape') setZoom(false); });
-setZoom(params.has('zoom'));
-if (params.has('zoom')) t = 1;
+camera.position.copy(overview.pos);
+controls.update();
+rest.pos.copy(overview.pos); rest.look.copy(overview.look);
+if (params.has('zoom')) { setZoom(true); t = 1; }
 
 // --- loop ---
 let last = performance.now(), elapsed = 0;
 const ease = (x) => x * x * (3 - 2 * x);
-const base = new THREE.Vector3();
 function frame() {
-  const now = performance.now(), dt = Math.min((now - last) / 1000, 0.05);
+  const now = performance.now(), dt = Math.min((now - last) / 1000, MAX_DT);
   last = now; elapsed += dt;
   t = THREE.MathUtils.clamp(t + (zoomed ? dt / 1.5 : -dt / 1.2), 0, 1);
-  const k = ease(t), free = 1 - k;
+  const k = ease(t);
 
-  mouseS.lerp(mouse, 1 - Math.exp(-dt * 4));
-  base.copy(overview.pos);
-  base.x += mouseS.x * 0.7 * free;
-  base.y += -mouseS.y * 0.35 * free;
-  curPos.lerpVectors(base, zoomView.pos, k);
-  curLook.lerpVectors(overview.look, zoomView.look, k);
-  camera.position.copy(curPos);
-  camera.lookAt(curLook);
+  if (t > 0 || zoomed) {
+    // gliding between the free-look view and the laptop screen
+    curPos.lerpVectors(rest.pos, zoomView.pos, k);
+    curLook.lerpVectors(rest.look, zoomView.look, k);
+    camera.position.copy(curPos);
+    camera.lookAt(curLook);
+    if (t === 0 && !zoomed) {            // arrived back: hand control to the user again
+      controls.target.copy(rest.look);
+      controls.enabled = true;
+      controls.update();
+    }
+  } else {
+    controls.update();
+  }
 
   update(elapsed);
   composer.render();
@@ -142,6 +186,5 @@ function frame() {
   requestAnimationFrame(frame);
 }
 resize();
-camera.position.copy(overview.pos);
 frame();
 ready.catch(console.error).finally(() => document.getElementById('loader').classList.add('done'));

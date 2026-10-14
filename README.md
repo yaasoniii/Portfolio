@@ -1,6 +1,6 @@
 # 3D Room Portfolio
 
-A realistic, interactive 3D room built with [three.js](https://threejs.org). Click the laptop to sit down and scroll through the desktop on its screen.
+A realistic, interactive 3D room built with [three.js](https://threejs.org). Drag to orbit the room, scroll to zoom, right-drag to pan; click the laptop to sit down and scroll through the desktop on its screen.
 
 ```bash
 npm install

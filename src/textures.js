@@ -117,34 +117,38 @@ export function rugTextures() {
   return { map: tex(c, { srgb: true, repeat: false }), bumpMap: tex(b) };
 }
 
-/** Night sky + distant city skyline seen through the window. */
+/**
+ * Night sky + city skyline painted as a panorama. Sampled by view direction (see room.js) so it behaves
+ * like something infinitely far away: it parallaxes correctly from any angle and only exists inside the window.
+ * Vertical axis: v = (elevation + 0.5) / 1.1 (radians); horizontal: u = 0.5 + azimuth / 1.6.
+ */
 export function nightSky() {
-  const W = 1536, H = 1024, c = canvas(W, H), g = c.getContext('2d');
+  const W = 2048, H = 1024, c = canvas(W, H), g = c.getContext('2d');
   const grad = g.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, '#050816'); grad.addColorStop(0.55, '#10193a'); grad.addColorStop(0.85, '#2b2a55'); grad.addColorStop(1, '#4a3a5e');
+  grad.addColorStop(0, '#04060f'); grad.addColorStop(0.45, '#10193a'); grad.addColorStop(0.65, '#2b2a55'); grad.addColorStop(0.8, '#5a4467'); grad.addColorStop(1, '#8a5a60');
   g.fillStyle = grad; g.fillRect(0, 0, W, H);
-  for (let i = 0; i < 380; i++) {
-    const x = Math.random() * W, y = Math.random() * H * 0.6, r = Math.random() * 1.4 + 0.3;
+  for (let i = 0; i < 520; i++) {
+    const x = Math.random() * W, y = Math.random() * H * 0.5, r = Math.random() * 1.5 + 0.4;
     g.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.7})`; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
   }
   // moon + halo
-  const mx = 1050, my = 300;
-  const halo = g.createRadialGradient(mx, my, 10, mx, my, 220);
-  halo.addColorStop(0, 'rgba(200,215,255,0.55)'); halo.addColorStop(1, 'rgba(200,215,255,0)');
-  g.fillStyle = halo; g.fillRect(mx - 240, my - 240, 480, 480);
-  g.fillStyle = '#eef3ff'; g.beginPath(); g.arc(mx, my, 46, 0, 7); g.fill();
+  const mx = W * 0.36, my = H * 0.46;
+  const halo = g.createRadialGradient(mx, my, 10, mx, my, 240);
+  halo.addColorStop(0, 'rgba(200,215,255,0.6)'); halo.addColorStop(1, 'rgba(200,215,255,0)');
+  g.fillStyle = halo; g.fillRect(mx - 260, my - 260, 520, 520);
+  g.fillStyle = '#eef3ff'; g.beginPath(); g.arc(mx, my, 50, 0, 7); g.fill();
   g.fillStyle = 'rgba(150,165,200,0.35)';
-  for (const [dx, dy, r] of [[-14, -8, 10], [10, 14, 8], [14, -14, 6]]) { g.beginPath(); g.arc(mx + dx, my + dy, r, 0, 7); g.fill(); }
-  // skyline
+  for (const [dx, dy, r] of [[-14, -8, 11], [11, 15, 9], [15, -15, 7]]) { g.beginPath(); g.arc(mx + dx, my + dy, r, 0, 7); g.fill(); }
+  // skyline (two layers; chunky lit windows so they read at window scale)
   for (let layer = 0; layer < 2; layer++) {
-    g.fillStyle = layer ? '#0b0d1c' : '#161733';
-    let x = 0;
+    const body = layer ? '#0e1024' : '#1f2142';
+    let x = -20;
     while (x < W) {
-      const w = 50 + Math.random() * 110, h = (layer ? 140 : 240) + Math.random() * (layer ? 220 : 260);
-      g.fillRect(x, H - h, w, h);
-      if (layer) for (let wy = H - h + 14; wy < H - 14; wy += 22) for (let wx = x + 8; wx < x + w - 10; wx += 18)
-        if (Math.random() < 0.18) { g.fillStyle = Math.random() < 0.7 ? '#ffd88a' : '#9fd0ff'; g.fillRect(wx, wy, 7, 10); g.fillStyle = '#0b0d1c'; }
-      x += w + Math.random() * 14;
+      const w = 80 + Math.random() * 140, h = (layer ? 190 : 250) + Math.random() * (layer ? 160 : 170);
+      g.fillStyle = body; g.fillRect(x, H - h, w, h);
+      for (let wy = H - h + 18; wy < H - 14; wy += 32) for (let wx = x + 12; wx < x + w - 20; wx += 26)
+        if (Math.random() < (layer ? 0.38 : 0.2)) { g.fillStyle = Math.random() < 0.75 ? '#ffd88a' : '#a5d4ff'; g.fillRect(wx, wy, 11, 15); }
+      x += w + Math.random() * 16;
     }
   }
   return tex(c, { srgb: true, repeat: false });

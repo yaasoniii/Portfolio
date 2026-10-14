@@ -112,8 +112,20 @@ export function buildRoom(scene, renderer) {
   rbox(room, [0.035, WIN.y1 - WIN.y0, 0.05], trim, [WIN.x, (WIN.y0 + WIN.y1) / 2, fz], 0.004);
   rbox(room, [WIN.w, 0.035, 0.05], trim, [WIN.x, 1.58, fz], 0.004);
   rbox(room, [WIN.w + 0.2, 0.035, 0.2], trim, [WIN.x, WIN.y0 - 0.02, z0 + 0.04], 0.01);   // sill
-  const sky = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 2.0), new THREE.MeshBasicMaterial({ map: nightSky(), toneMapped: false }));
-  sky.position.set(WIN.x, 1.5, -3.6); room.add(sky);
+  const sky = new THREE.Mesh(new THREE.PlaneGeometry(WIN.w - 0.02, WIN.y1 - WIN.y0 - 0.02), new THREE.ShaderMaterial({
+    uniforms: { tSky: { value: nightSky() } },
+    vertexShader: 'varying vec3 vW; void main(){ vec4 w = modelMatrix * vec4(position,1.); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: `
+      uniform sampler2D tSky; varying vec3 vW;
+      void main(){
+        vec3 d = normalize(vW - cameraPosition);
+        float az = atan(d.x, -d.z), el = asin(clamp(d.y, -1., 1.));
+        vec2 uv = vec2(0.5 + az / 1.6, clamp((el + 0.5) / 1.1, 0., 1.));
+        gl_FragColor = vec4(texture2D(tSky, uv).rgb, 1.);
+      }`,
+  }));
+  sky.position.set(WIN.x, (WIN.y0 + WIN.y1) / 2, bz);   // sits inside the wall thickness: only visible through the opening
+  room.add(sky);
 
   // curtains (folded cloth) + rod
   const clothMat = new THREE.MeshPhysicalMaterial({ color: 0xd7cfc2, roughness: 0.95, sheen: 1, sheenColor: new THREE.Color(0xfff3e0), sheenRoughness: 0.6, side: THREE.DoubleSide });
@@ -194,7 +206,7 @@ export function buildRoom(scene, renderer) {
 
   const spines = spineTextures(10);
   const cover = [0x8c2f39, 0x1f4e5f, 0xd1a054, 0x2f3e46, 0x6b705c, 0xb5838d, 0x3a506b, 0xe07a5f, 0x264653, 0xa68a64];
-  const pagesMat = std(0xe9e1cf, { roughness: 1 });
+  const pagesMat = std(0xcfc5b0, { roughness: 1 });
   const bookMats = spines.map((s, i) => [std(0xffffff, { map: s, roughness: 0.6 }), pagesMat, pagesMat, pagesMat, std(cover[i], { roughness: 0.7 }), std(cover[i], { roughness: 0.7 })]);
   for (let r = 0; r < rows; r++) {
     const y0 = 0.1 + r * rowH + ST / 2;
