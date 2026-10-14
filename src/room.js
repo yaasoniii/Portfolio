@@ -1,195 +1,287 @@
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { RectAreaLightUniformsLib } from 'three/examples/jsm/lights/RectAreaLightUniformsLib.js';
+import { buildLaptop } from './laptop.js';
+import { loadFitted } from './models.js';
+import { woodTextures, plasterBump, rugTextures, nightSky, posterTexture, spineTextures } from './textures.js';
 
-const mat = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.8, metalness: 0, ...o });
+// All dimensions are in metres.
+const ROOM = { x0: -2.6, x1: 2.6, z0: -2.2, z1: 2.4, h: 2.7, t: 0.12 };
+const WIN = { x: 0.45, w: 1.3, y0: 0.95, y1: 2.15 };
+const DESK_Y = 0.74;
 
-function box(parent, [w, h, d], color, [x, y, z], o = {}) {
-  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), typeof color === 'object' && color.isMaterial ? color : mat(color, o));
+const rand = (a, b) => a + Math.random() * (b - a);
+// deterministic pseudo-random so the room looks identical every visit
+let seed = 7;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const rr = (a, b) => a + rnd() * (b - a);
+
+function rbox(parent, [w, h, d], mat, [x, y, z], r = 0.008, seg = 3) {
+  const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, d, seg, Math.min(r, w / 2, h / 2, d / 2)), mat);
   m.position.set(x, y, z);
   m.castShadow = m.receiveShadow = true;
   parent.add(m);
   return m;
 }
-function cyl(parent, [rt, rb, h], color, [x, y, z], seg = 24, o = {}) {
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat(color, o));
+function cyl(parent, [rt, rb, h], mat, [x, y, z], seg = 32) {
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
   m.position.set(x, y, z);
   m.castShadow = m.receiveShadow = true;
   parent.add(m);
   return m;
 }
+const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.7, ...o });
 
-export function buildRoom(scene) {
+export function buildRoom(scene, renderer) {
+  RectAreaLightUniformsLib.init();
+  const aniso = renderer.capabilities.getMaxAnisotropy();
   const room = new THREE.Group();
   scene.add(room);
 
-  // ---------- lights ----------
-  scene.add(new THREE.HemisphereLight(0xb9c4ff, 0x4a3a5a, 0.9));
-  const sun = new THREE.DirectionalLight(0xcfd9ff, 1.4);
-  sun.position.set(-1, 6, 3);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
-  Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 0.5, far: 20 });
-  sun.shadow.bias = -0.0005;
-  scene.add(sun);
+  // ================= materials =================
+  const floorTex = woodTextures({ planks: 8, tones: [0xa98259, 0x9f7a52, 0xb28a60, 0x987450], rings: 12, jointsPerTile: 1, gap: 0.02 });
+  for (const t of Object.values(floorTex)) { t.repeat.set(4.4, 3.9); t.anisotropy = aniso; }
+  const floorMat = new THREE.MeshStandardMaterial({ map: floorTex.map, roughnessMap: floorTex.roughnessMap, bumpMap: floorTex.bumpMap, bumpScale: 1.2, roughness: 0.85 });
 
-  const lampLight = new THREE.PointLight(0xffb36b, 8, 6, 1.6);
-  lampLight.position.set(1.15, 1.45, -2.45);
-  lampLight.castShadow = true;
-  lampLight.shadow.mapSize.set(1024, 1024);
-  scene.add(lampLight);
+  const plaster = plasterBump();
+  plaster.repeat.set(3, 2);
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xc2b6a6, roughness: 0.93, bumpMap: plaster, bumpScale: 0.35 });
+  const sageMat = new THREE.MeshStandardMaterial({ color: 0x8f9c88, roughness: 0.93, bumpMap: plaster, bumpScale: 0.35 });
+  const trim = new THREE.MeshStandardMaterial({ color: 0xece8e1, roughness: 0.5 });
 
-  const screenGlow = new THREE.PointLight(0x7a8cff, 1.2, 3, 2);
-  screenGlow.position.set(0, 1.25, -1.9);
-  scene.add(screenGlow);
+  const deskTex = woodTextures({ planks: 1, tones: [0x6a4630, 0x5b3b29, 0x73503a], rings: 7, jointsPerTile: 1, gap: 0 });
+  for (const t of Object.values(deskTex)) { t.repeat.set(1, 1); t.anisotropy = aniso; }
+  const deskMat = new THREE.MeshPhysicalMaterial({ map: deskTex.map, roughnessMap: deskTex.roughnessMap, bumpMap: deskTex.bumpMap, bumpScale: 0.6, roughness: 0.6, clearcoat: 0.25, clearcoatRoughness: 0.5 });
+  const oakTex = woodTextures({ planks: 1, tones: [0xb8996f, 0xae9066, 0xc0a279], rings: 8, jointsPerTile: 1, gap: 0 });
+  for (const t of Object.values(oakTex)) t.anisotropy = aniso;
+  const oakMat = new THREE.MeshStandardMaterial({ map: oakTex.map, roughnessMap: oakTex.roughnessMap, bumpMap: oakTex.bumpMap, bumpScale: 0.5, roughness: 0.75 });
+  const blackMetal = std(0x1b1c20, { metalness: 0.9, roughness: 0.4 });
+  const brass = std(0xb08d4a, { metalness: 1, roughness: 0.3 });
 
-  // ---------- shell: floor + two walls ----------
-  const wallMat = mat(0xd9cfe8);
-  box(room, [7.4, 0.2, 7.4], 0x9c7a5b, [0, -0.1, 0.5]); // floor (wood)
-  box(room, [7.4, 4, 0.2], wallMat, [0, 2, -3.1]); // back wall
-  box(room, [0.2, 4, 7.4], mat(0xcfc3e0), [-3.6, 2, 0.5]); // left wall
-  box(room, [7.4, 0.14, 0.06], 0xf4efff, [0, 0.07, -2.97]); // baseboards
-  box(room, [0.06, 0.14, 7.2], 0xf4efff, [-3.47, 0.07, 0.5]);
+  // ================= lights =================
+  scene.add(new THREE.HemisphereLight(0x7f8fc4, 0x2a1f1a, 0.55));
 
-  // floor boards
-  for (let i = -3; i <= 3; i++) box(room, [0.015, 0.002, 7.2], 0x7d5f45, [i * 0.95, 0.002, 0.5]);
+  // moonlight pouring through the window
+  const moon = new THREE.DirectionalLight(0xa6bcff, 2.2);
+  moon.position.set(WIN.x - 2.2, 5.2, -9);
+  moon.target.position.set(0.2, 0, -0.6);
+  scene.add(moon, moon.target);
+  moon.castShadow = true;
+  moon.shadow.mapSize.set(2048, 2048);
+  Object.assign(moon.shadow.camera, { left: -4.5, right: 4.5, top: 4.5, bottom: -4.5, near: 2, far: 22 });
+  moon.shadow.bias = -0.0004; moon.shadow.normalBias = 0.02; moon.shadow.radius = 4;
 
-  // rug
-  const rug = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.02, 48), mat(0x6c4bd1));
-  rug.position.set(0.3, 0.012, -0.3); rug.receiveShadow = true; room.add(rug);
-  const rug2 = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.025, 48), mat(0xf2a65a));
-  rug2.position.set(0.3, 0.014, -0.3); rug2.receiveShadow = true; room.add(rug2);
+  // warm desk lamp (spot) + a soft bounce
+  const lampSpot = new THREE.SpotLight(0xffb272, 13, 0, 0.7, 0.9, 2);
+  lampSpot.castShadow = true;
+  lampSpot.shadow.mapSize.set(1024, 1024); lampSpot.shadow.bias = -0.0006; lampSpot.shadow.radius = 5;
+  scene.add(lampSpot, lampSpot.target);
+  const lampBounce = new THREE.PointLight(0xff9d57, 0.6, 4.5, 2);
+  scene.add(lampBounce);
 
-  // ---------- window (back wall, left) ----------
-  const winX = -2.0, winY = 2.1;
-  const sky = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.5), new THREE.MeshBasicMaterial({ color: 0x9ec9ff }));
-  sky.position.set(winX, winY, -2.995); room.add(sky);
-  box(room, [1.5, 0.08, 0.12], 0xffffff, [winX, winY + 0.79, -2.95]);
-  box(room, [1.5, 0.08, 0.12], 0xffffff, [winX, winY - 0.79, -2.95]);
-  box(room, [0.08, 1.6, 0.12], 0xffffff, [winX - 0.71, winY, -2.95]);
-  box(room, [0.08, 1.6, 0.12], 0xffffff, [winX + 0.71, winY, -2.95]);
-  box(room, [0.05, 1.5, 0.1], 0xffffff, [winX, winY, -2.95]);
-  box(room, [1.4, 0.05, 0.1], 0xffffff, [winX, winY, -2.95]);
+  // ================= shell =================
+  const { x0, x1, z0, z1, h, t } = ROOM;
+  const slabW = x1 - x0 + t + 0.2, slabD = z1 - z0 + t + 0.2;
+  const slab = new THREE.Mesh(new THREE.BoxGeometry(slabW, 0.12, slabD), [floorMat.clone(), floorMat.clone(), floorMat, floorMat.clone(), floorMat.clone(), floorMat.clone()]);
+  slab.material[0].map = slab.material[1].map = slab.material[4].map = slab.material[5].map = null;
+  [0, 1, 4, 5].forEach((i) => { slab.material[i] = std(0x7a5a3a, { roughness: 0.9 }); });
+  slab.position.set((x0 + x1) / 2 - t / 2, -0.06, (z0 + z1) / 2 - t / 2);
+  slab.receiveShadow = true; slab.castShadow = true;
+  room.add(slab);
 
-  // ---------- desk ----------
-  const wood = mat(0xb98a5e);
-  box(room, [2.8, 0.08, 1.0], wood, [0, 0.76, -2.3]);
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) box(room, [0.08, 0.76, 0.08], 0x3a3340, [sx * 1.28, 0.38, -2.3 + sz * 0.42]);
-  box(room, [0.9, 0.5, 0.9], 0xa77a52, [-0.85, 0.46, -2.3]); // drawer unit
-  box(room, [0.84, 0.18, 0.02], 0x8c6340, [-0.85, 0.64, -1.84]);
-  box(room, [0.84, 0.18, 0.02], 0x8c6340, [-0.85, 0.4, -1.84]);
+  const wall = (w, hh, d, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, hh, d), wallMat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; room.add(m); };
+  const bz = z0 - t / 2;               // back-wall centre z
+  const wx0 = x0 - t, wx1 = x1;        // back-wall x span
+  const wl = WIN.x - WIN.w / 2, wr = WIN.x + WIN.w / 2;
+  wall(wl - wx0, h, t, (wx0 + wl) / 2, h / 2, bz);
+  wall(wx1 - wr, h, t, (wr + wx1) / 2, h / 2, bz);
+  wall(WIN.w, WIN.y0, t, WIN.x, WIN.y0 / 2, bz);
+  wall(WIN.w, h - WIN.y1, t, WIN.x, (WIN.y1 + h) / 2, bz);
+  { const m = new THREE.Mesh(new THREE.BoxGeometry(t, h, z1 - z0 + t), sageMat); m.position.set(x0 - t / 2, h / 2, (z0 - t + z1) / 2); m.castShadow = m.receiveShadow = true; room.add(m); }  // left wall
 
-  // ---------- laptop ----------
-  const laptop = new THREE.Group();
-  laptop.position.set(0.15, 0.8, -2.35);
-  room.add(laptop);
-  const alu = mat(0xb8bcc8, { metalness: 0.7, roughness: 0.35 });
-  box(laptop, [0.72, 0.022, 0.5], alu, [0, 0.011, 0]);
-  box(laptop, [0.6, 0.002, 0.2], 0x2a2a33, [0, 0.023, -0.05]); // keyboard deck
-  box(laptop, [0.2, 0.002, 0.13], 0x9ca0ad, [0, 0.023, 0.17]); // trackpad
+  // baseboards
+  rbox(room, [wx1 - x0 - 0.0, 0.1, 0.014], trim, [(x0 + wx1) / 2, 0.05, z0 + 0.007], 0.004);
+  rbox(room, [0.014, 0.1, z1 - z0], trim, [x0 + 0.007, 0.05, (z0 + z1) / 2], 0.004);
 
-  const lid = new THREE.Group();
-  lid.position.set(0, 0.022, -0.24);
-  lid.rotation.x = -0.32;
-  laptop.add(lid);
-  box(lid, [0.72, 0.47, 0.02], alu, [0, 0.235, 0.01]);
-  box(lid, [0.68, 0.43, 0.004], 0x050508, [0, 0.235, 0.0205]); // bezel
-  const screenSize = { w: 0.64, h: 0.4 };
-  lid.userData.screenCenter = new THREE.Vector3(0, 0.235, 0.0235);
+  // window: frame, mullions, sill, night view
+  const fz = bz;
+  rbox(room, [WIN.w + 0.08, 0.05, 0.1], trim, [WIN.x, WIN.y1 + 0.005, fz], 0.006);
+  rbox(room, [WIN.w + 0.08, 0.05, 0.1], trim, [WIN.x, WIN.y0 - 0.005, fz], 0.006);
+  rbox(room, [0.05, WIN.y1 - WIN.y0, 0.1], trim, [wl - 0.005, (WIN.y0 + WIN.y1) / 2, fz], 0.006);
+  rbox(room, [0.05, WIN.y1 - WIN.y0, 0.1], trim, [wr + 0.005, (WIN.y0 + WIN.y1) / 2, fz], 0.006);
+  rbox(room, [0.035, WIN.y1 - WIN.y0, 0.05], trim, [WIN.x, (WIN.y0 + WIN.y1) / 2, fz], 0.004);
+  rbox(room, [WIN.w, 0.035, 0.05], trim, [WIN.x, 1.58, fz], 0.004);
+  rbox(room, [WIN.w + 0.2, 0.035, 0.2], trim, [WIN.x, WIN.y0 - 0.02, z0 + 0.04], 0.01);   // sill
+  const sky = new THREE.Mesh(new THREE.PlaneGeometry(3.0, 2.0), new THREE.MeshBasicMaterial({ map: nightSky(), toneMapped: false }));
+  sky.position.set(WIN.x, 1.5, -3.6); room.add(sky);
 
-  // small items on desk
-  const lamp = new THREE.Group(); lamp.position.set(1.15, 0.8, -2.5); room.add(lamp);
-  cyl(lamp, [0.12, 0.14, 0.03], 0x2d2a36, [0, 0.015, 0]);
-  cyl(lamp, [0.015, 0.015, 0.6], 0x2d2a36, [0, 0.33, 0]);
-  const shade = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.2, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0xffd28a, emissive: 0xffa24a, emissiveIntensity: 0.9, side: THREE.DoubleSide }));
-  shade.position.set(0, 0.68, 0); lamp.add(shade);
+  // curtains (folded cloth) + rod
+  const clothMat = new THREE.MeshPhysicalMaterial({ color: 0xd7cfc2, roughness: 0.95, sheen: 1, sheenColor: new THREE.Color(0xfff3e0), sheenRoughness: 0.6, side: THREE.DoubleSide });
+  const curtain = (cx, w) => {
+    const g = new THREE.PlaneGeometry(w, 2.4, 60, 1);
+    const pos = g.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), y = pos.getY(i);
+      pos.setZ(i, Math.sin(x / w * Math.PI * 7) * 0.03 * (0.7 + 0.3 * (1 - (y + 1.2) / 2.4)));
+    }
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, clothMat);
+    m.position.set(cx, 1.28, z0 + 0.09); m.castShadow = m.receiveShadow = true; room.add(m);
+  };
+  curtain(wl - 0.3, 0.7); curtain(wr + 0.3, 0.7);
+  const rod = cyl(room, [0.01, 0.01, 2.6], brass, [WIN.x, 2.5, z0 + 0.11]); rod.rotation.z = Math.PI / 2;
+  for (const s of [-1, 1]) { const f = new THREE.Mesh(new THREE.SphereGeometry(0.022, 16, 12), brass); f.position.set(WIN.x + s * 1.31, 2.5, z0 + 0.11); room.add(f); }
 
-  cyl(room, [0.06, 0.05, 0.11], 0xf2f2f2, [-0.7, 0.855, -2.5]); // mug
-  cyl(room, [0.045, 0.045, 0.005], 0x3b2314, [-0.7, 0.908, -2.5]);
-  box(room, [0.28, 0.025, 0.2], 0x2f4fa8, [-0.55, 0.81, -2.55]); // books
-  box(room, [0.26, 0.025, 0.19], 0xd9534f, [-0.55, 0.835, -2.55]);
-  box(room, [0.1, 0.012, 0.18], 0x222, [0.75, 0.806, -2.1]); // phone
-  box(room, [0.3, 0.02, 0.1], 0x2a2a33, [0.15, 0.81, -2.0]); // (keyboard-ish wireless pad)
+  // ================= rug =================
+  const rug = rugTextures();
+  rug.bumpMap.repeat.set(24, 17); rug.bumpMap.anisotropy = aniso; rug.map.anisotropy = aniso;
+  const rugMesh = new THREE.Mesh(new RoundedBoxGeometry(2.4, 0.012, 1.7, 2, 0.005),
+    new THREE.MeshPhysicalMaterial({ map: rug.map, bumpMap: rug.bumpMap, bumpScale: 1.6, roughness: 1, sheen: 0.5, sheenColor: new THREE.Color(0x6d6350), sheenRoughness: 0.9 }));
+  rugMesh.position.set(0.3, 0.006, -0.25); rugMesh.receiveShadow = true; rugMesh.castShadow = true;
+  room.add(rugMesh);
 
-  // ---------- chair ----------
-  const chair = new THREE.Group(); chair.position.set(0.3, 0, -1.35); chair.rotation.y = 0.35; room.add(chair);
-  const cloth = mat(0x3e3a52);
-  box(chair, [0.55, 0.09, 0.55], cloth, [0, 0.5, 0]);
-  box(chair, [0.55, 0.65, 0.08], cloth, [0, 0.9, 0.27]);
-  cyl(chair, [0.03, 0.03, 0.45], 0x999, [0, 0.25, 0]);
-  for (let i = 0; i < 5; i++) {
-    const a = (i / 5) * Math.PI * 2;
-    const leg = box(chair, [0.05, 0.03, 0.34], 0x333, [Math.sin(a) * 0.17, 0.06, Math.cos(a) * 0.17]);
-    leg.rotation.y = a;
-    cyl(chair, [0.035, 0.035, 0.04], 0x111, [Math.sin(a) * 0.33, 0.03, Math.cos(a) * 0.33]);
+  // ================= desk =================
+  const dz = z0 + 0.37;
+  rbox(room, [1.6, 0.035, 0.72], deskMat, [0.35, DESK_Y - 0.0175, dz], 0.012);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1])
+    rbox(room, [0.04, DESK_Y - 0.035, 0.04], blackMetal, [0.35 + sx * 0.74, (DESK_Y - 0.035) / 2, dz + sz * 0.3], 0.006);
+  rbox(room, [1.44, 0.03, 0.03], blackMetal, [0.35, 0.62, dz - 0.3], 0.006);   // back rail
+  // drawer unit
+  const cab = new THREE.Group(); cab.position.set(0.95, 0, dz + 0.02); room.add(cab);
+  rbox(cab, [0.44, 0.56, 0.6], deskMat, [0, 0.31, 0], 0.01);
+  for (const y of [0.45, 0.2]) {
+    rbox(cab, [0.4, 0.23, 0.012], oakMat, [0, y, 0.305], 0.006);
+    rbox(cab, [0.14, 0.012, 0.014], brass, [0, y + 0.06, 0.318], 0.005);
   }
 
-  // ---------- bookshelf (left wall) ----------
-  const shelf = new THREE.Group(); shelf.position.set(-3.3, 0, -1.2); room.add(shelf);
-  const shelfMat = mat(0x6a4a3a);
-  box(shelf, [0.4, 2.2, 0.05], shelfMat, [0, 1.1, -0.6]);
-  box(shelf, [0.4, 2.2, 0.05], shelfMat, [0, 1.1, 0.6]);
-  for (let i = 0; i <= 5; i++) box(shelf, [0.4, 0.04, 1.25], shelfMat, [0, i * 0.43 + 0.02, 0]);
-  const palette = [0xe76f51, 0x2a9d8f, 0xe9c46a, 0x6c4bd1, 0xf4a261, 0x457b9d, 0xd62828];
-  for (let r = 0; r < 5; r++) {
-    let z = -0.55;
-    while (z < 0.5) {
-      const w = 0.04 + Math.random() * 0.05, h = 0.25 + Math.random() * 0.12;
-      if (Math.random() < 0.12) { z += 0.12; continue; }
-      box(shelf, [0.26, h, w], palette[(Math.random() * palette.length) | 0], [0.0, r * 0.43 + 0.04 + h / 2, z + w / 2]);
-      z += w + 0.004;
+  // desk mat, notebook, pen
+  rbox(room, [0.74, 0.004, 0.36], std(0x2b2e36, { roughness: 0.95 }), [0.35, DESK_Y + 0.002, dz + 0.02], 0.002);
+  const nb = rbox(room, [0.15, 0.014, 0.21], std(0xe8e2d4, { roughness: 0.85 }), [0.78, DESK_Y + 0.007, dz + 0.1], 0.003); nb.rotation.y = 0.3;
+  const pen = cyl(room, [0.004, 0.004, 0.15], std(0x20232b, { metalness: 0.6, roughness: 0.35 }), [0.7, DESK_Y + 0.018, dz + 0.04]); pen.rotation.z = Math.PI / 2; pen.rotation.y = -0.5;
+
+  // ================= laptop =================
+  const { group: laptop, lid, screenSize } = buildLaptop();
+  laptop.position.set(0.3, DESK_Y + 0.004, dz + 0.0);
+  room.add(laptop);
+
+  // ================= desk lamp =================
+  const lamp = new THREE.Group(); lamp.position.set(-0.22, DESK_Y, dz - 0.14); room.add(lamp);
+  const lampMat = std(0x23252b, { metalness: 0.8, roughness: 0.35 });
+  cyl(lamp, [0.075, 0.08, 0.018], lampMat, [0, 0.009, 0]);
+  const arm1 = cyl(lamp, [0.006, 0.006, 0.36], lampMat, [0.045, 0.19, 0]); arm1.rotation.z = -0.28;
+  const joint = new THREE.Mesh(new THREE.SphereGeometry(0.014, 16, 12), lampMat); joint.position.set(0.09, 0.365, 0); lamp.add(joint);
+  const arm2 = cyl(lamp, [0.006, 0.006, 0.34], lampMat, [0.175, 0.44, 0]); arm2.rotation.z = 1.15;
+  const head = new THREE.Group(); head.position.set(0.28, 0.52, 0); head.rotation.z = -0.2; lamp.add(head);
+  const hood = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.075, 0.1, 40, 1, true), new THREE.MeshStandardMaterial({ color: 0x23252b, metalness: 0.8, roughness: 0.35, side: THREE.DoubleSide }));
+  hood.castShadow = true; head.add(hood);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.022, 16, 12), new THREE.MeshStandardMaterial({ color: 0xffe2b8, emissive: 0xffb26b, emissiveIntensity: 2.5 }));
+  bulb.position.y = -0.025; head.add(bulb);
+  lamp.updateWorldMatrix(true, true);
+  const bw = bulb.getWorldPosition(new THREE.Vector3());
+  lampSpot.position.copy(bw).add(new THREE.Vector3(0, -0.01, 0));
+  lampSpot.target.position.set(0.18, DESK_Y, dz + 0.02);
+  lampBounce.position.copy(bw).add(new THREE.Vector3(0, 0.1, 0.1));
+
+  // ================= bookshelf (left wall) =================
+  const sh = new THREE.Group(); sh.position.set(x0 + 0.17, 0, -0.15); room.add(sh);
+  const SW = 1.5, SH = 1.95, SD = 0.32, ST = 0.022;
+  const rows = 5, rowH = (SH - 0.1) / rows;
+  rbox(sh, [SD, SH, ST], oakMat, [0, SH / 2, -SW / 2 + ST / 2], 0.004);
+  rbox(sh, [SD, SH, ST], oakMat, [0, SH / 2, SW / 2 - ST / 2], 0.004);
+  rbox(sh, [0.01, SH, SW], oakMat, [-SD / 2 + 0.005, SH / 2, 0], 0.002);     // back panel
+  rbox(sh, [SD, 0.1, SW], std(0x2a2623, { roughness: 0.7 }), [0, 0.05, 0], 0.004);  // plinth
+  for (let i = 0; i <= rows; i++) rbox(sh, [SD, ST, SW], oakMat, [0, 0.1 + i * rowH, 0], 0.004);
+
+  const spines = spineTextures(10);
+  const cover = [0x8c2f39, 0x1f4e5f, 0xd1a054, 0x2f3e46, 0x6b705c, 0xb5838d, 0x3a506b, 0xe07a5f, 0x264653, 0xa68a64];
+  const pagesMat = std(0xe9e1cf, { roughness: 1 });
+  const bookMats = spines.map((s, i) => [std(0xffffff, { map: s, roughness: 0.6 }), pagesMat, pagesMat, pagesMat, std(cover[i], { roughness: 0.7 }), std(cover[i], { roughness: 0.7 })]);
+  for (let r = 0; r < rows; r++) {
+    const y0 = 0.1 + r * rowH + ST / 2;
+    let z = -SW / 2 + ST + 0.02;
+    const end = SW / 2 - ST - 0.02 - (r % 2 === 0 ? 0.0 : 0.4);
+    while (z < end - 0.04) {
+      const th = rr(0.022, 0.05), ht = rr(0.2, rowH - 0.05), dp = rr(0.16, 0.22), k = (rnd() * 10) | 0;
+      const lean = rnd() < 0.06;
+      const b = new THREE.Mesh(new THREE.BoxGeometry(dp, ht, th), bookMats[k]);
+      b.castShadow = b.receiveShadow = true;
+      b.position.set(SD / 2 - dp / 2 - 0.012, y0 + ht / 2, z + th / 2);
+      if (lean) { b.rotation.x = -0.18; b.position.z += 0.03; }
+      sh.add(b);
+      z += th + 0.002 + (lean ? 0.05 : 0);
+    }
+    // little decor at the end of alternate rows
+    if (r % 2 === 1) {
+      const zc = SW / 2 - 0.2;
+      for (let n = 0; n < 3; n++) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.03, 0.16), bookMats[(n * 3 + r) % 10]); b.castShadow = b.receiveShadow = true;
+        b.position.set(0.0, y0 + 0.015 + n * 0.032, zc); b.rotation.y = rr(-0.1, 0.1); sh.add(b); }
+      // tiny succulent
+      const pot = cyl(sh, [0.04, 0.032, 0.06], std(0xb5694a, { roughness: 0.9 }), [0.0, y0 + 0.096 + 0.03, zc]);
+      for (let n = 0; n < 7; n++) {
+        const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.03, 12, 8), std(0x5f8a5a, { roughness: 0.6 }));
+        leaf.scale.set(0.5, 1.3, 0.25); const a = (n / 7) * Math.PI * 2;
+        leaf.position.set(Math.cos(a) * 0.025, y0 + 0.17, zc + Math.sin(a) * 0.025);
+        leaf.rotation.set(Math.sin(a) * 0.9, a, Math.cos(a) * -0.9); leaf.castShadow = true; sh.add(leaf);
+      }
     }
   }
 
-  // ---------- plant ----------
-  const plant = new THREE.Group(); plant.position.set(2.9, 0, -2.5); room.add(plant);
-  cyl(plant, [0.28, 0.2, 0.45], 0xc4684a, [0, 0.225, 0]);
-  const leaves = [];
-  for (let i = 0; i < 9; i++) {
-    const l = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 8), mat(0x3f9b5c));
-    l.scale.set(0.5, 1.5, 0.15);
-    const a = (i / 9) * Math.PI * 2;
-    l.position.set(Math.sin(a) * 0.15, 0.85 + (i % 3) * 0.12, Math.cos(a) * 0.15);
-    l.rotation.set(Math.cos(a) * 0.5, a, Math.sin(a) * -0.5);
-    l.castShadow = true;
-    plant.add(l); leaves.push(l);
+  // ================= console (right) =================
+  const cx = 1.6, cy = 0.5;
+  const con = new THREE.Group(); room.add(con);
+  rbox(con, [0.95, 0.035, 0.38], oakMat, [cx, cy - 0.0175, z0 + 0.2], 0.008);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const leg = cyl(con, [0.014, 0.01, cy - 0.035], blackMetal, [cx + sx * 0.4, (cy - 0.035) / 2, z0 + 0.2 + sz * 0.13]);
+    leg.rotation.z = sx * 0.05;
   }
 
-  // ---------- wall decor ----------
-  const frame = (w, h, c, pos, rotY = 0) => {
+  // ================= frames =================
+  const frameMat = std(0x1c1b1d, { roughness: 0.45 });
+  const matMat = std(0xf1ede4, { roughness: 0.95 });
+  const frame = (w, hh, kind, pos, rotY = 0) => {
     const g = new THREE.Group(); g.position.set(...pos); g.rotation.y = rotY; room.add(g);
-    box(g, [w + 0.06, h + 0.06, 0.04], 0x1e1b26, [0, 0, 0]);
-    box(g, [w, h, 0.045], c, [0, 0, 0.002], { roughness: 0.5 });
-    return g;
+    rbox(g, [w, hh, 0.03], frameMat, [0, 0, 0], 0.004);
+    rbox(g, [w - 0.04, hh - 0.04, 0.032], matMat, [0, 0, 0.001], 0.002);
+    const art = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.14, hh - 0.14), std(0xffffff, { map: posterTexture(kind), roughness: 0.8 }));
+    art.position.z = 0.0175; art.receiveShadow = true; g.add(art);
   };
-  frame(0.7, 0.9, 0xf2a65a, [-0.9, 1.95, -2.98]);
-  frame(0.9, 0.6, 0x6c4bd1, [0.4, 2.1, -2.98]);
-  frame(0.5, 0.5, 0x2a9d8f, [1.35, 1.9, -2.98]);
-  frame(0.8, 1.0, 0xe76f51, [-3.57, 2.0, 0.2], Math.PI / 2);
+  const fy = z0 + 0.015;
+  frame(0.5, 0.7, 0, [-1.05, 1.55, fy]);
+  frame(0.34, 0.44, 1, [-1.62, 1.75, fy]);
+  frame(0.56, 0.76, 2, [1.75, 1.6, fy]);
+  frame(0.7, 0.5, 1, [x0 + 0.015, 1.7, 1.5], Math.PI / 2);
 
-  // string lights along the back wall
-  const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffe2a8 });
-  for (let i = 0; i < 16; i++) {
-    const x = -3.3 + i * 0.44;
-    const b = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), bulbMat);
-    b.position.set(x, 3.25 - Math.sin((i / 15) * Math.PI) * 0.22 * -1 - 0.2 * Math.sin((i / 15) * Math.PI), -2.95);
-    room.add(b);
-  }
+  // ================= string lights =================
+  const bulbMat = new THREE.MeshStandardMaterial({ color: 0xffe3b0, emissive: 0xffc37a, emissiveIntensity: 5 });
+  const strand = (xa, xb, sag) => {
+    const pts = []; for (let i = 0; i <= 24; i++) { const u = i / 24; pts.push(new THREE.Vector3(mixN(xa, xb, u), 2.52 - Math.sin(u * Math.PI) * sag, z0 + 0.04)); }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const wire = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.0018, 4), std(0x111111, { roughness: 0.6 })); room.add(wire);
+    for (let i = 1; i < 13; i++) { const p = curve.getPoint(i / 13); const b = new THREE.Mesh(new THREE.SphereGeometry(0.012, 10, 8), bulbMat); b.position.copy(p).add(new THREE.Vector3(0, -0.015, 0)); room.add(b); }
+  };
+  const mixN = (a, b, t) => a + (b - a) * t;
+  strand(x0 + 0.05, WIN.x - 0.3, 0.22); strand(WIN.x + 0.3, x1 - 0.05, 0.2);
 
-  // beanbag
-  const bean = new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 16), mat(0xe76f51));
-  bean.scale.y = 0.65; bean.position.set(2.3, 0.35, 0.2); bean.castShadow = bean.receiveShadow = true; room.add(bean);
-
-  // dust motes
-  const n = 120, pos = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) pos.set([(Math.random() - 0.5) * 6, Math.random() * 3.5, Math.random() * 6 - 3], i * 3);
-  const dustGeo = new THREE.BufferGeometry(); dustGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0xfff0d0, size: 0.02, transparent: true, opacity: 0.6 }));
+  // ================= dust motes =================
+  const n = 160, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) pos.set([rand(-1.6, 1.8), rand(0.2, 2.3), rand(-2, 0.5)], i * 3);
+  const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const dust = new THREE.Points(dg, new THREE.PointsMaterial({ color: 0xcfdaff, size: 0.008, transparent: true, opacity: 0.55, depthWrite: false }));
   room.add(dust);
 
-  scene.userData.update = (t) => {
-    leaves.forEach((l, i) => (l.rotation.z += Math.sin(t * 1.2 + i) * 0.0006));
-    dust.position.y = Math.sin(t * 0.3) * 0.08;
-    dust.rotation.y = t * 0.01;
-  };
+  // ================= glTF props (Khronos sample assets, see CREDITS.md) =================
+  const ready = Promise.all([
+    loadFitted('SheenChair', { height: 0.9 }).then((o) => { o.position.set(0.35, 0, -1.18); o.rotation.y = Math.PI + 0.12; room.add(o); }),
+    loadFitted('DiffuseTransmissionPlant', { height: 1.25 }).then((o) => { o.position.set(2.22, 0, -1.7); room.add(o); }),
+    loadFitted('SpecularSilkPouf', { height: 0.42 }).then((o) => { o.position.set(-1.35, 0, 1.0); o.rotation.y = 0.5; room.add(o); }),
+    loadFitted('GlassVaseFlowers', { height: 0.4 }).then((o) => { o.position.set(cx - 0.2, cy, z0 + 0.2); con.add(o); }),
+    loadFitted('GlassHurricaneCandleHolder', { height: 0.2 }).then((o) => {
+      o.position.set(cx + 0.2, cy, z0 + 0.2); con.add(o);
+      const flame = new THREE.PointLight(0xffa24d, 0.35, 2.5, 2); flame.position.set(cx + 0.2, cy + 0.1, z0 + 0.2); con.add(flame);
+    }),
+    loadFitted('DiffuseTransmissionTeacup', { height: 0.085 }).then((o) => { o.position.set(0.62, DESK_Y + 0.004, dz - 0.07); o.rotation.y = 0.6; room.add(o); }),
+  ]);
 
-  return { room, laptop, lid, screenSize };
+  const update = (time) => { dust.rotation.y = time * 0.012; dust.position.y = Math.sin(time * 0.3) * 0.04; };
+  return { room, laptop, lid, screenSize, update, ready };
 }
