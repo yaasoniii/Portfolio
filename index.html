@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio — 3D Room</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="css3d"></div>
+  <canvas id="gl"></canvas>
+
+  <div id="loader">Setting up the room…</div>
+  <div id="hint">Move your mouse to look around · <b>click the laptop</b> to sit down</div>
+  <button id="back" hidden>← Back to room</button>
+
+  <template id="desktop-template">
+    <div class="os">
+      <div class="menubar">
+        <span class="apple"></span><b id="os-title">Portfolio</b>
+        <span>File</span><span>Edit</span><span>View</span>
+        <span class="spacer"></span>
+        <span id="clock"></span>
+      </div>
+      <div class="scroller" id="scroller">
+        <section id="home" class="hero">
+          <p class="eyebrow">Hello, world 👋</p>
+          <h1 id="c-name"></h1>
+          <h2 id="c-role"></h2>
+          <p id="c-tagline"></p>
+          <p class="scroll-cue">scroll ↓</p>
+        </section>
+
+        <section id="about">
+          <div class="window">
+            <div class="titlebar"><i></i><i></i><i></i><span>about.txt</span></div>
+            <div class="body" id="c-about"></div>
+          </div>
+        </section>
+
+        <section id="projects">
+          <div class="window">
+            <div class="titlebar"><i></i><i></i><i></i><span>Projects</span></div>
+            <div class="body grid" id="c-projects"></div>
+          </div>
+        </section>
+
+        <section id="skills">
+          <div class="window">
+            <div class="titlebar"><i></i><i></i><i></i><span>skills.sh</span></div>
+            <div class="body mono" id="c-skills"></div>
+          </div>
+        </section>
+
+        <section id="contact">
+          <div class="window">
+            <div class="titlebar"><i></i><i></i><i></i><span>Contact</span></div>
+            <div class="body" id="c-contact"></div>
+          </div>
+        </section>
+        <footer>© <span id="year"></span> · built with three.js</footer>
+      </div>
+      <div class="dock">
+        <button data-go="home" title="Home">🏠</button>
+        <button data-go="about" title="About">📄</button>
+        <button data-go="projects" title="Projects">📁</button>
+        <button data-go="skills" title="Skills">⚙️</button>
+        <button data-go="contact" title="Contact">✉️</button>
+      </div>
+    </div>
+  </template>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
