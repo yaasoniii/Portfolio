@@ -1,0 +1,128 @@
+{
+  "title": "Choose the visual world",
+  "question": "The roll assigned the Drafting Studio. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Drafting Studio",
+      "kicker": "THE ROLL",
+      "lineage": "engineering drawing sets and the working architect's studio",
+      "thesis": "A photoreal engineer's studio in late daylight, where the work is issued as a drawing set.",
+      "palette": ["#eeece6", "#23262b", "#23466e", "#c8432b"],
+      "materials": ["birch ply, concrete and plaster under low sun", "drafting vellum and pen-plotter linework"],
+      "viewport": "Wide daylight shot of the studio: sun shafts across a drafting desk, the laptop the sharpest thing in frame.",
+      "risk": "The drawing-set grammar on the laptop reads as costume unless the title block and sheet index actually navigate.",
+      "raised": [
+        { "from": "challenger-shader-portal", "raise": "The loader counts real asset progress to 100 instead of a static line." },
+        { "from": "challenger-step-row", "raise": "The laptop's sheet index always marks where you are, like a chase light." },
+        { "from": "challenger-orizuru", "raise": "Every sheet is deep-linkable (#projects) so a recruiter can share the exact page." }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "Archviz Loft",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "V-Ray / Corona architectural visualisation stills",
+      "thesis": "A Scandinavian loft rendered like an archviz still: low sun, white oak, linen, plaster.",
+      "palette": ["#f2efe9", "#c9b79c", "#6f7a6a", "#1d1f22"],
+      "materials": ["white oak and limewash", "linen and brushed steel"],
+      "viewport": "Sunlit loft corner with the desk by a tall window; the laptop carries a calm, native-feeling desktop.",
+      "risk": "Familiar: this is where most 'make the room realistic' runs land."
+    },
+    {
+      "id": "challenger-shader-portal",
+      "label": "Shader Portal",
+      "verdict": "declined",
+      "lineage": "experiential-studio WebGL landing pages",
+      "thesis": "A full-screen shader with thin type floating over living pixels.",
+      "palette": ["#0c0b1a", "#f2f0ea", "#ff7a3d"],
+      "materials": ["fragment-shader field", "film grain"],
+      "viewport": "One huge word over a breathing shader; corner links.",
+      "case": "Fuses poorly: throws away the realistic room you asked for, and recruiters lose the obvious path to content.",
+      "kept": "A loader that counts real progress.",
+      "risk": "Style over substance for a hiring audience.",
+      "hero": "https://impeccable.style/worlds/cards/webgl-shader-portal-hero.webp"
+    },
+    {
+      "id": "challenger-step-row",
+      "label": "Rhythm Machine",
+      "verdict": "declined",
+      "lineage": "early-80s drum machines",
+      "thesis": "Sections as a sixteen-step row under a running chase light.",
+      "palette": ["#2a2a2c", "#d8402f", "#f08a2c", "#f2d54a"],
+      "materials": ["silkscreened panel", "LED keys"],
+      "viewport": "A step row as the page's one unbroken line.",
+      "case": "Fuses poorly: no link to a developer's work or to realism.",
+      "kept": "An always-visible marker of where you are.",
+      "risk": "Novelty that obscures content.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-drum-machine-step-row-hero.webp"
+    },
+    {
+      "id": "challenger-orizuru",
+      "label": "Folding Sequence",
+      "verdict": "declined",
+      "lineage": "origami crease diagrams",
+      "thesis": "One sheet folded through numbered, recoverable steps.",
+      "palette": ["#c8372d", "#f3eadb", "#1c1a18", "#c9a24a"],
+      "materials": ["washi fibre", "crease lines"],
+      "viewport": "A centred sheet with numbered folds in a margin column.",
+      "case": "Fuses poorly: beautiful, but recruiters don't identify with it and it drops the room.",
+      "kept": "Every step deep-linkable and recoverable.",
+      "risk": "Reads as an art piece, not a portfolio.",
+      "hero": "https://impeccable.style/worlds/cards/paper-folds-pleats-deployable-orizuru-crane-sequence-hero.webp"
+    },
+    {
+      "id": "challenger-brick",
+      "label": "Build Instructions",
+      "verdict": "declined",
+      "lineage": "brick-toy instruction booklets",
+      "thesis": "Projects as numbered exploded assembly steps.",
+      "palette": ["#7fb6dd", "#111111", "#c8302a", "#f2c932"],
+      "materials": ["stud grid", "keyline ink"],
+      "viewport": "Big step numeral, ghosted prior assembly, bright new piece.",
+      "case": "Fuses poorly: toy register undercuts 'professional'.",
+      "kept": "Wordless arrows: the laptop affordance should be a cue, not a paragraph.",
+      "risk": "Playful where the brief asks for professional.",
+      "hero": "https://impeccable.style/worlds/cards/games-toys-physics-play-brick-build-instructions-hero.webp"
+    },
+    {
+      "id": "challenger-vhs",
+      "label": "Rental Wall",
+      "verdict": "declined",
+      "lineage": "video-store shelving",
+      "thesis": "Projects as clamshell spines on a genre wall.",
+      "palette": ["#0b0b0c", "#c4242b", "#3a7bd5", "#f1d23a"],
+      "materials": ["clamshell plastic", "fluorescent light"],
+      "viewport": "A packed shelf, one box pulled face-out.",
+      "case": "Fuses poorly: nostalgic theme, no realism, wrong audience.",
+      "kept": "Browsing sideways along a shelf is a strong physical metaphor for a project list.",
+      "risk": "Costume.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-vhs-rental-wall-hero.webp"
+    },
+    {
+      "id": "challenger-broadcast",
+      "label": "Signal Degradation",
+      "verdict": "declined",
+      "lineage": "broadcast emergency cards",
+      "thesis": "Colour bars and a crawl, tuned like channels.",
+      "palette": ["#0a0a0a", "#e6e600", "#00b4e6", "#e60000"],
+      "materials": ["tape noise", "burned-in timecode"],
+      "viewport": "Please-stand-by card with running timecode.",
+      "case": "Fuses poorly: glitch aesthetics fight 'professional and realistic'.",
+      "kept": "A live clock locked to one corner of the laptop.",
+      "risk": "Unsettling for a hiring audience.",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-emergency-signal-degradation-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "canon": true,
+  "canonCard": {
+    "label": "Cozy night bedroom, done right",
+    "thesis": "The lo-fi night bedroom with fairy lights and a glowing laptop, executed at full craft.",
+    "palette": ["#0f1220", "#e9b872", "#c9c2b6", "#3d5a80"],
+    "materials": ["warm practical lights", "moonlit window"],
+    "viewport": "Same room as today, re-lit and re-textured to a much higher standard.",
+    "risk": "Indistinguishable from most 3D-room portfolios by design."
+  },
+  "steer": true
+}
