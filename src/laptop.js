@@ -69,7 +69,8 @@ export function buildLaptop() {
 
   const screenSize = { w: 0.296, h: 0.185 };
   const screenCenter = new THREE.Vector3(0, D / 2 + 0.002, front + 0.0004);
-  const glow = new THREE.Mesh(new THREE.PlaneGeometry(screenSize.w, screenSize.h), new THREE.MeshBasicMaterial({ color: new THREE.Color(2.0, 1.9, 2.6), toneMapped: false }));
+  // the screen: shows a painted cover sheet from afar (see desktop.js screenTexture); the live HTML takes over up close
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(screenSize.w, screenSize.h), new THREE.MeshBasicMaterial({ color: new THREE.Color(1.6, 1.6, 1.6) }));
   glow.position.copy(screenCenter);
   lid.add(glow);
   lid.userData = { screenCenter, screenSize, glow };
@@ -81,7 +82,7 @@ export function buildLaptop() {
   logo.rotation.y = Math.PI; logo.position.set(0, D / 2, -0.0002); lid.add(logo);
 
   // light spilling from the display onto the keyboard / desk
-  const spill = new THREE.RectAreaLight(0x9db4ff, 1.6, screenSize.w, screenSize.h);
+  const spill = new THREE.RectAreaLight(0xeef2ff, 0.5, screenSize.w, screenSize.h);
   spill.position.set(0, D / 2, front + 0.004);
   spill.rotation.y = Math.PI;
   lid.add(spill);

@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-14T16:30:00Z",
+  "title": "Design System: Portfolio",
+  "extensions": {
+    "colorMeta": {
+      "page-ground": { "role": "neutral", "displayName": "Page Ground", "canonical": "#e4e1db", "note": "WebGL paper after AgX tone mapping (scene.background linear 2.2, 2.0, 1.55 at exposure 1.15); CSS --page matches.", "tonalRamp": ["#2a2925", "#4a4842", "#716e67", "#99958d", "#bdb9b1", "#d6d3cc", "#e4e1db", "#f4f3f0"] },
+      "sheet-paper": { "role": "neutral", "displayName": "Sheet Paper", "canonical": "#eeece6", "tonalRamp": ["#2b2a27", "#4d4b46", "#76736b", "#9e9a91", "#c4c0b7", "#dcd9d2", "#eeece6", "#f8f7f4"] },
+      "graphite": { "role": "neutral", "displayName": "Graphite", "canonical": "#23262b", "tonalRamp": ["#15171a", "#23262b", "#3a3e45", "#52565e", "#6a6e75", "#8f939a", "#c3c5c9", "#ebecee"] },
+      "graphite-soft": { "role": "neutral", "displayName": "Graphite Soft", "canonical": "#464a51", "tonalRamp": ["#15171a", "#23262b", "#464a51", "#52565e", "#6a6e75", "#8f939a", "#c3c5c9", "#ebecee"] },
+      "graphite-faint": { "role": "neutral", "displayName": "Graphite Faint", "canonical": "#6a6e75", "note": "About 4.3:1 on sheet paper; labels and figures only.", "tonalRamp": ["#15171a", "#23262b", "#3a3e45", "#52565e", "#6a6e75", "#8f939a", "#c3c5c9", "#ebecee"] },
+      "rule": { "role": "neutral", "displayName": "Rule", "canonical": "rgba(35, 38, 43, 0.16)", "tonalRamp": ["rgba(35,38,43,0.9)", "rgba(35,38,43,0.6)", "rgba(35,38,43,0.4)", "rgba(35,38,43,0.3)", "rgba(35,38,43,0.22)", "rgba(35,38,43,0.16)", "rgba(35,38,43,0.1)", "rgba(35,38,43,0.06)"] },
+      "prussian-blue": { "role": "primary", "displayName": "Prussian Blue Ink", "canonical": "#23466e", "tonalRamp": ["#0f1f33", "#1a3554", "#23466e", "#345f91", "#5079ad", "#7d9cc6", "#b5c8e0", "#e6edf6"] },
+      "redline": { "role": "secondary", "displayName": "Redline", "canonical": "#c8432b", "tonalRamp": ["#3f140c", "#6e2416", "#a8371f", "#c8432b", "#d9684f", "#e69482", "#f2c3b8", "#fbe9e5"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The name on the cover sheet; the loader percentage in the same voice at 88px." },
+      "headline": { "displayName": "Headline", "purpose": "Sheet titles over a 2px graphite rule; the studio title block name at 24px." },
+      "title": { "displayName": "Title", "purpose": "Project titles in the detail list; contact links at 22px/600." },
+      "body-lead": { "displayName": "Body Lead", "purpose": "First paragraph of prose sheets." },
+      "body": { "displayName": "Body", "purpose": "Sheet base text; prose at 18px/1.6 in graphite-soft, 60ch max." },
+      "label": { "displayName": "Label", "purpose": "Uppercase condensed annotations: column heads, field names, captions, spec tags (blue)." },
+      "sheet-number": { "displayName": "Sheet Number", "purpose": "Sheet numbers, dates, times and other data in tabular figures." }
+    },
+    "shadows": [
+      { "name": "paper-halo", "value": "0 0 2px #eeece6, 0 0 6px #eeece6, 0 0 12px #eeece6", "purpose": "text-shadow behind the callout label where it sits over the 3D scene." },
+      { "name": "marker-ring", "value": "0 0 0 3px rgba(238, 236, 230, 0.8)", "purpose": "Paper ring around the red callout dot." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "The single UI easing." },
+      { "name": "invert", "value": "background-color 0.2s, color 0.2s", "purpose": "Hover inversion of outlined controls and index rows." },
+      { "name": "sheet-draw-on", "value": "0.7s ease-out, sides staggered 0.1s", "purpose": "Sheet border draws on as the camera lands at the laptop." },
+      { "name": "chrome-fade", "value": "opacity/transform 0.6s ease-out, 12px rise", "purpose": "Title block entering and leaving the studio view." },
+      { "name": "loader-lift", "value": "opacity 0.7s ease-out", "purpose": "Loader fades once progress reaches 100." }
+    ],
+    "breakpoints": [
+      { "name": "titleblock-compact", "value": "640px" },
+      { "name": "back-offset", "value": "759px" },
+      { "name": "flat-set", "value": "width < 760px or height < 480px (JS)" }
+    ],
+    "world": {
+      "materials": ["polished concrete (procedural, clearcoat 0.35)", "limewash plaster (bump-mapped)", "birch ply cladding and desk", "black powder-coat steel #1d1f22 (window grid, lamp, bin)", "vellum and paper drawings", "graphite section poché #23262b on cut wall tops and slab edges"],
+      "lighting": ["warm low sun 0xffc88e, 4.6, soft shadows", "cool sky rect-area fill 0xc4d6ff through the steel grid window", "hemisphere fill 0xcbd9f0 / 0x8f7f6a", "warm floor bounce 0xffc996", "drafting lamp 0xffc58a as the warm desk accent"],
+      "post": ["GTAO", "bloom 0.12", "AgX tone mapping, exposure 1.15", "SMAA"],
+      "annotation": "One dimension string drawn on the paper ground along the front edge.",
+      "openItems": ["Volumetric sun shafts do not yet read as distinct beams at the desktop overview.", "On phones the floor reads dim outside the sun patch.", "Phone title-block index lacks sheet numbers on its four section buttons."]
+    }
+  },
+  "components": [
+    {
+      "name": "Outlined Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Square, outlined in graphite, inverts on hover. Read the set; Back to the studio.",
+      "html": "<button class=\"ds-btn\">Read the set<svg class=\"ds-ico\" viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M3 8h9.5M8.5 4 12.5 8l-4 4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"/></svg></button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; background: #eeece6; color: #23262b; border: 1.5px solid #23262b; border-radius: 0; font: 600 14px/1.2 Archivo, 'Helvetica Neue', Arial, sans-serif; cursor: pointer; transition: background-color 0.2s, color 0.2s; } .ds-ico { width: 16px; height: 16px; transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn:hover { background: #23262b; color: #eeece6; } .ds-btn:hover .ds-ico { transform: translateX(3px); } .ds-btn:active { transform: translateY(1px); } .ds-btn:focus-visible { outline: 2px solid #23466e; outline-offset: 3px; }"
+    },
+    {
+      "name": "Studio Title Block",
+      "kind": "nav",
+      "refersTo": "title-block",
+      "description": "The studio overview's navigation drawn as a title block; sheet A-000 Studio.",
+      "html": "<aside class=\"ds-tb\"><div class=\"ds-tb-id\"><strong>Your Name</strong><span>Creative Developer</span></div><nav class=\"ds-tb-index\"><a href=\"#\" class=\"ds-tb-sit\"><span class=\"ds-no\">A-001</span>Sit at the desk</a><a href=\"#\"><span class=\"ds-no\">A-101</span>About</a><a href=\"#\"><span class=\"ds-no\">A-201</span>Projects</a><a href=\"#\"><span class=\"ds-no\">A-301</span>Skills</a><a href=\"#\"><span class=\"ds-no\">A-401</span>Contact</a></nav><dl class=\"ds-tb-meta\"><div><dt>Sheet</dt><dd>A-000 Studio</dd></div><div><dt>Issued</dt><dd>2026-10-14</dd></div></dl></aside>",
+      "css": ".ds-tb { width: 340px; background: #eeece6; border: 1.5px solid #23262b; color: #23262b; font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; } .ds-tb-id { display: grid; gap: 2px; padding: 16px 18px 14px; border-bottom: 1.5px solid #23262b; } .ds-tb-id strong { font-size: 24px; line-height: 1.05; font-weight: 800; font-stretch: 125%; letter-spacing: -0.03em; } .ds-tb-id span { font-size: 14px; font-weight: 500; color: #23466e; } .ds-tb-index { display: grid; grid-template-columns: 1fr 1fr; } .ds-tb-index a { display: flex; align-items: baseline; gap: 10px; padding: 12px 18px; font-size: 15px; font-weight: 600; color: #23262b; text-decoration: none; border-bottom: 1px solid rgba(35,38,43,0.16); transition: background-color 0.2s, color 0.2s; } .ds-tb-index a:nth-child(even) { border-right: 1px solid rgba(35,38,43,0.16); } .ds-tb-sit { grid-column: 1 / -1; } .ds-tb-index a:hover { background: #23262b; color: #eeece6; } .ds-tb-index a:focus-visible { outline: 2px solid #23466e; outline-offset: 3px; } .ds-no, .ds-tb-meta dt { font-size: 11px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.08em; text-transform: uppercase; color: #6a6e75; font-variant-numeric: tabular-nums; } .ds-tb-index a:hover .ds-no { color: inherit; opacity: 0.7; } .ds-tb-meta { display: grid; grid-template-columns: auto 1fr; margin: 0; } .ds-tb-meta div { display: flex; flex-direction: column; gap: 2px; padding: 10px 18px 12px; } .ds-tb-meta div + div { border-left: 1px solid rgba(35,38,43,0.16); } .ds-tb-meta dd { margin: 0; font-size: 13px; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Sheet Index",
+      "kind": "nav",
+      "refersTo": "sheet-index-item",
+      "description": "Title-block column on every sheet; the current sheet is always marked in redline.",
+      "html": "<nav class=\"ds-si\"><button aria-current=\"true\"><span class=\"ds-si-no\">A-001</span><span class=\"ds-si-tt\">Cover</span></button><button><span class=\"ds-si-no\">A-101</span><span class=\"ds-si-tt\">About</span></button><button><span class=\"ds-si-no\">A-201</span><span class=\"ds-si-tt\">Projects</span></button></nav>",
+      "css": ".ds-si { display: grid; width: 232px; padding: 6px 0; background: #eeece6; border-left: 1px solid #23262b; font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; } .ds-si button { position: relative; display: grid; grid-template-columns: 54px 1fr; align-items: baseline; padding: 9px 18px; border: 0; background: none; color: #23262b; text-align: left; font: inherit; cursor: pointer; transition: background-color 0.2s; } .ds-si button:hover { background: rgba(35,38,43,0.06); } .ds-si button:focus-visible { outline: 2px solid #23466e; outline-offset: -2px; } .ds-si-no { font-size: 12px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.06em; color: #6a6e75; font-variant-numeric: tabular-nums; } .ds-si-tt { font-size: 14px; font-weight: 500; } .ds-si [aria-current] .ds-si-no { color: #c8432b; } .ds-si [aria-current] .ds-si-tt { font-weight: 700; } .ds-si [aria-current]::before { content: ''; position: absolute; left: 7px; top: 50%; width: 5px; height: 5px; margin-top: -2px; border-radius: 50%; background: #c8432b; }"
+    },
+    {
+      "name": "Project Detail",
+      "kind": "card",
+      "refersTo": "detail-bubble",
+      "description": "A project as a drawing detail: split bubble, title, description, spec tags, open link.",
+      "html": "<a class=\"ds-detail\" href=\"#\"><span class=\"ds-bubble\"><b>1</b><i>A-201</i></span><span><h3>Project title</h3><p>One line on what it does and the hardest problem solved.</p><span class=\"ds-spec\">Three.js / WebGL / GLSL</span></span><span class=\"ds-go\">Open</span></a>",
+      "css": ".ds-detail { display: grid; grid-template-columns: 52px 1fr auto; gap: 20px; align-items: start; padding: 18px 12px 18px 0; color: #23262b; text-decoration: none; border-bottom: 1px solid rgba(35,38,43,0.16); background: #eeece6; font: 400 15px/1.55 Archivo, 'Helvetica Neue', Arial, sans-serif; transition: background-color 0.2s; } .ds-bubble { position: relative; display: grid; grid-template-rows: 1fr 1fr; width: 52px; height: 52px; border: 1.5px solid #23262b; border-radius: 50%; text-align: center; } .ds-bubble::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid #23262b; } .ds-bubble b { align-self: end; padding-bottom: 2px; font-size: 15px; font-weight: 700; } .ds-bubble i { align-self: start; padding-top: 3px; font-style: normal; font-size: 9px; font-weight: 600; font-stretch: 75%; color: #6a6e75; } .ds-detail h3 { margin: 2px 0 4px; font-size: 20px; line-height: 1.2; font-weight: 700; font-stretch: 112%; letter-spacing: -0.01em; transition: color 0.2s; } .ds-detail p { margin: 0 0 8px; color: #464a51; } .ds-spec { font-size: 11px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.1em; text-transform: uppercase; color: #23466e; } .ds-go { padding-top: 4px; font-size: 13px; font-weight: 600; } .ds-detail:hover { background: linear-gradient(90deg, rgba(35,70,110,0.06), transparent 80%); } .ds-detail:hover h3 { color: #23466e; } .ds-detail:focus-visible { outline: 2px solid #23466e; outline-offset: 3px; }"
+    },
+    {
+      "name": "Detail Callout",
+      "kind": "custom",
+      "description": "Signature: red pin, angled leader and split bubble pinned to the laptop; opens sheet A-001.",
+      "html": "<button class=\"ds-callout\"><span class=\"ds-dot\"></span><span class=\"ds-leader\"></span><span class=\"ds-cb\"><span class=\"ds-bub\"><b>1</b><i>A-001</i></span><span class=\"ds-lbl\">Sit at the desk</span></span></button>",
+      "css": ".ds-callout { position: relative; display: block; width: 260px; height: 140px; padding: 0; border: 0; background: none; cursor: pointer; color: #23262b; font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; } .ds-dot { position: absolute; left: 30px; bottom: 16px; width: 8px; height: 8px; border-radius: 50%; background: #c8432b; box-shadow: 0 0 0 3px rgba(238,236,230,0.8); } .ds-leader { position: absolute; left: 34px; bottom: 20px; width: 1.5px; height: 54px; background: #23262b; transform-origin: bottom; transform: rotate(38deg); } .ds-cb { position: absolute; left: 56px; bottom: 60px; display: flex; align-items: center; gap: 10px; white-space: nowrap; font-size: 15px; font-weight: 700; transition: transform 0.25s cubic-bezier(0.16,1,0.3,1); } .ds-bub { position: relative; display: grid; grid-template-rows: 1fr 1fr; width: 48px; height: 48px; border: 1.5px solid #23262b; border-radius: 50%; background: #eeece6; text-align: center; transition: background-color 0.2s, color 0.2s; } .ds-bub::after { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid currentColor; } .ds-bub b { align-self: end; padding-bottom: 1px; font-size: 15px; } .ds-bub i { align-self: start; padding-top: 2px; font-style: normal; font-size: 11px; font-weight: 600; font-stretch: 75%; } .ds-lbl { text-shadow: 0 0 2px #eeece6, 0 0 6px #eeece6, 0 0 12px #eeece6; text-decoration: underline 1.5px transparent; text-underline-offset: 4px; transition: text-decoration-color 0.2s; } .ds-callout:hover .ds-cb, .ds-callout:focus-visible .ds-cb { transform: translateY(-2px); } .ds-callout:hover .ds-bub, .ds-callout:focus-visible .ds-bub { background: #23262b; color: #eeece6; } .ds-callout:hover .ds-lbl, .ds-callout:focus-visible .ds-lbl { text-decoration-color: currentColor; } .ds-callout:focus-visible { outline: none; }"
+    },
+    {
+      "name": "Preliminary Stamp",
+      "kind": "custom",
+      "refersTo": "preliminary-stamp",
+      "description": "Shown only while content.draft is true; marks placeholder copy.",
+      "html": "<p class=\"ds-stamp\"><b>Preliminary</b><span>Placeholder copy, not for issue</span></p>",
+      "css": ".ds-stamp { display: inline-grid; gap: 2px; margin: 0; padding: 8px 12px; border: 1.5px solid #c8432b; color: #c8432b; transform: rotate(-2deg); text-align: center; font-family: Archivo, 'Helvetica Neue', Arial, sans-serif; background: #eeece6; } .ds-stamp b { font-size: 15px; font-weight: 800; font-stretch: 125%; letter-spacing: 0.08em; text-transform: uppercase; } .ds-stamp span { font-size: 11px; font-weight: 500; }"
+    },
+    {
+      "name": "Schedule",
+      "kind": "custom",
+      "description": "Skills as a drawing schedule table.",
+      "html": "<table class=\"ds-sched\"><thead><tr><th>Area</th><th>Tools</th></tr></thead><tbody><tr><th>Graphics</th><td>Three.js, WebGL, GLSL</td></tr><tr><th>Front end</th><td>React, Vue, Svelte</td></tr></tbody></table>",
+      "css": ".ds-sched { width: 100%; border-collapse: collapse; background: #eeece6; color: #23262b; font: 400 16px/1.55 Archivo, 'Helvetica Neue', Arial, sans-serif; } .ds-sched th, .ds-sched td { padding: 14px 16px 14px 0; text-align: left; border-bottom: 1px solid rgba(35,38,43,0.16); } .ds-sched thead th { padding-top: 0; font-size: 11px; font-weight: 600; font-stretch: 75%; letter-spacing: 0.1em; text-transform: uppercase; color: #6a6e75; border-bottom: 2px solid #23262b; } .ds-sched tbody th { width: 34%; font-weight: 700; } .ds-sched td { color: #464a51; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Issued Drawing Set",
+    "overview": "The site is an engineer's drafting studio in late daylight, cut away like an architectural section and set on a sheet of paper. Every piece of interface is a part of a drawing set: a title block, a sheet index, a detail callout bubble, a revision table, a dimension string. Nothing floats as generic \"UI\"; it is drawn, ruled and numbered. The portfolio content is issued as sheets (A-001 Cover, A-101 About, A-201 Projects, A-301 Skills, A-401 Contact), and the studio overview itself is sheet A-000 Studio.\n\nThe 3D world and the HTML share one material logic. The scene is a photoreal room (polished concrete, limewash plaster, birch ply, black powder-coat steel, vellum drawings) lit by a warm low sun through a steel grid window with a cool sky fill, and its cut wall tops and slab edges are solid graphite poché sitting on the paper ground, with one dimension string drawn on the paper along the front edge. The HTML layer above it uses the same graphite linework on the same paper, so the overlay reads as an annotation of the drawing, not a panel on top of a game.\n\nDensity is a drafting sheet's: hairline rules, tabular figures, condensed caps labels, one expanded heavy voice for names and sheet titles. The single colour accent is Prussian blue ink; redline appears only for revision marks, the stamp and \"you are here.\"",
+    "keyCharacteristics": [
+      "One paper ground, graphite linework, Prussian blue as the only ink accent, redline reserved for marks.",
+      "Archivo across its width axis: expanded heavy for titles, condensed caps for labels, tabular figures for sheet data.",
+      "Square-cornered, ruled, outlined components; circles only where drafting uses circles (detail bubbles, markers).",
+      "Depth lives in the 3D scene and its light; the HTML is flat paper.",
+      "Every sheet carries a number, and the index always marks the current sheet."
+    ],
+    "rules": [
+      { "name": "The One Ink Rule", "body": "Prussian blue is the only chromatic accent in the interface. A second hue entering the HTML is a new world, not an extension.", "section": "colors" },
+      { "name": "The Redline Rule", "body": "Red marks revisions and position: the stamp, the current sheet, \"you are here.\" If it is not a mark a drafter would make in red pencil, it is not red.", "section": "colors" },
+      { "name": "The Two Papers Rule", "body": "Ground is page-ground, sheets are sheet-paper. Do not collapse them into one value and do not introduce a third.", "section": "colors" },
+      { "name": "The Width Axis Rule", "body": "Hierarchy is carried by width and weight before size: expanded heavy for titles, normal for reading, condensed for annotation. Do not bring in a second family.", "section": "typography" },
+      { "name": "The Tabular Rule", "body": "Every number that is data (sheet numbers, dates, times, percentages, revision numbers) is set with tabular figures.", "section": "typography" },
+      { "name": "The Paper Is Flat Rule", "body": "Nothing printed on paper casts a shadow. Lift a control by inverting it to graphite, not by raising it.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do set every surface on page-ground or sheet-paper and draw on it in graphite.",
+      "Do number every sheet and mark the current one in redline in the index.",
+      "Do separate with 1.5px outlines and hairline rules; invert to graphite for hover and pressed states.",
+      "Do use Archivo's width axis for hierarchy: width 125 heavy for titles, width 75 caps for labels, tabular figures for data.",
+      "Do build new components from drawing-set parts (title block cells, detail bubbles, schedules, dimension strings, revision rows).",
+      "Do keep scene materials to the studio's palette: polished concrete, limewash, birch ply, black powder-coat steel, vellum and paper, under warm sun and cool sky."
+    ],
+    "donts": [
+      "Don't add a second accent hue, or use redline for anything that is not a revision mark, stamp or position marker.",
+      "Don't put drop shadows on HTML paper; halos are only for legibility over the 3D scene.",
+      "Don't round rectangle corners (key caps excepted at 3px); reserve circles for bubbles and markers.",
+      "Don't use graphite-faint for running text.",
+      "Don't introduce a second typeface or an icon font; icons are thin line SVG drawn in currentColor."
+    ]
+  }
+}

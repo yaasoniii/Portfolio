@@ -14,3 +14,6 @@
 
 Everything else (room, desk, laptop, bookshelf, textures, skyline) is generated procedurally in code.
 Reflections use three.js's built-in `RoomEnvironment`.
+
+## Font
+`public/fonts/archivo-latin.woff2`: [Archivo](https://github.com/Omnibus-Type/Archivo) by Omnibus-Type, variable width and weight, Latin subset as served by Google Fonts. Licensed under the [SIL Open Font License 1.1](https://openfontlicense.org).

@@ -2,74 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio — 3D Room</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Portfolio</title>
+  <meta name="description" content="A portfolio you can walk into: a real-time 3D drafting studio built with three.js. Sit at the desk to read the work." />
+  <meta name="theme-color" content="#e4e1db" />
+  <meta property="og:title" content="Portfolio" />
+  <meta property="og:description" content="A real-time 3D drafting studio built with three.js. Sit at the desk to read the work." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23eeece6' stroke='%2323262b' stroke-width='2.5'/%3E%3Cpath d='M3 16h26' stroke='%2323262b' stroke-width='2'/%3E%3Ccircle cx='16' cy='9.5' r='3' fill='%23c8432b'/%3E%3C/svg%3E" />
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <canvas id="gl"></canvas>
+  <a class="skip" href="#about">Skip to the portfolio</a>
+  <canvas id="gl" role="img" aria-label="A sunlit 3D drafting studio. Drag to look around; the laptop on the desk opens the portfolio."></canvas>
   <div id="css3d"></div>
-  <div id="vignette"></div>
+  <div id="sheet-flat" aria-hidden="true"></div>
 
-  <div id="loader">Setting up the room…</div>
-  <div id="hint"><b>Drag</b> to look around · <b>scroll</b> to zoom · right-drag to pan · <b>click the laptop</b> to sit down</div>
-  <button id="back" hidden>← Back to room</button>
-
-  <template id="desktop-template">
-    <div class="os">
-      <div class="menubar">
-        <span class="apple"></span><b id="os-title">Portfolio</b>
-        <span>File</span><span>Edit</span><span>View</span>
-        <span class="spacer"></span>
-        <span id="clock"></span>
-      </div>
-      <div class="scroller" id="scroller">
-        <section id="home" class="hero">
-          <p class="eyebrow">Hello, world 👋</p>
-          <h1 id="c-name"></h1>
-          <h2 id="c-role"></h2>
-          <p id="c-tagline"></p>
-          <p class="scroll-cue">scroll ↓</p>
-        </section>
-
-        <section id="about">
-          <div class="window">
-            <div class="titlebar"><i></i><i></i><i></i><span>about.txt</span></div>
-            <div class="body" id="c-about"></div>
-          </div>
-        </section>
-
-        <section id="projects">
-          <div class="window">
-            <div class="titlebar"><i></i><i></i><i></i><span>Projects</span></div>
-            <div class="body grid" id="c-projects"></div>
-          </div>
-        </section>
-
-        <section id="skills">
-          <div class="window">
-            <div class="titlebar"><i></i><i></i><i></i><span>skills.sh</span></div>
-            <div class="body mono" id="c-skills"></div>
-          </div>
-        </section>
-
-        <section id="contact">
-          <div class="window">
-            <div class="titlebar"><i></i><i></i><i></i><span>Contact</span></div>
-            <div class="body" id="c-contact"></div>
-          </div>
-        </section>
-        <footer>© <span id="year"></span> · built with three.js</footer>
-      </div>
-      <div class="dock">
-        <button data-go="home" title="Home">🏠</button>
-        <button data-go="about" title="About">📄</button>
-        <button data-go="projects" title="Projects">📁</button>
-        <button data-go="skills" title="Skills">⚙️</button>
-        <button data-go="contact" title="Contact">✉️</button>
-      </div>
+  <div id="loader" role="status" aria-live="polite">
+    <div class="loader-inner">
+      <span class="loader-label">Drawing the studio</span>
+      <span class="loader-pct"><b id="pct">0</b><span>%</span></span>
+      <span class="loader-rule" aria-hidden="true"><i id="pct-bar"></i></span>
     </div>
-  </template>
+  </div>
+
+  <button id="callout" class="callout" type="button" tabindex="-1">
+    <span class="callout-dot" aria-hidden="true"></span>
+    <span class="callout-leader" aria-hidden="true"></span>
+    <span class="callout-bubble"><span class="bub" aria-hidden="true"><b>1</b><i>A-001</i></span><span class="lbl">Sit at the desk</span></span>
+  </button>
+
+  <aside class="titleblock" aria-label="Portfolio">
+    <div class="tb-id">
+      <strong id="tb-name"></strong>
+      <span id="tb-role"></span>
+    </div>
+    <nav class="tb-index" aria-label="Sheets">
+      <a href="#cover" class="tb-sit"><span class="no">A-001</span>Sit at the desk</a>
+      <a href="#about"><span class="no">A-101</span>About</a>
+      <a href="#projects"><span class="no">A-201</span>Projects</a>
+      <a href="#skills"><span class="no">A-301</span>Skills</a>
+      <a href="#contact"><span class="no">A-401</span>Contact</a>
+    </nav>
+    <dl class="tb-meta">
+      <div><dt>Sheet</dt><dd>A-000 Studio</dd></div>
+      <div><dt>Issued</dt><dd id="tb-date"></dd></div>
+      <div class="tb-help"><dt>View</dt><dd>Drag to look around, scroll to zoom</dd></div>
+    </dl>
+  </aside>
+
+  <button id="back" class="back" type="button" hidden>
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3.5M7.5 4 3.5 8l4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+    Back to the studio <kbd>Esc</kbd>
+  </button>
 
   <script type="module" src="/src/main.js"></script>
 </body>
