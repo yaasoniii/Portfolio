@@ -6,6 +6,7 @@ A portfolio you can walk into: a sunlit drafting studio rendered in real time wi
 npm install
 npm run dev     # local dev server
 npm run build   # static build in dist/
+npm run preview # serve the built dist/ locally
 ```
 
 - Edit `src/content.js` to change the name, role, projects, skills and contact links. Set `draft: false` once the copy is real; while it is `true` the sheets carry a red PRELIMINARY stamp.
