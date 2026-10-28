@@ -18,11 +18,13 @@ export const content = {
     { title: 'This portfolio', desc: 'A real-time 3D drafting studio: procedural materials, ray-marched sun shafts and a baked reflection probe, all in three.js.', tags: ['Three.js', 'WebGL', 'GLSL'], link: 'https://github.com/yaasoniii/Portfolio' },
   ],
   skills: [
-    { area: 'Languages', items: 'JavaScript, TypeScript, Python' },
-    { area: 'Front end', items: 'React, Vue, Svelte' },
+    { area: 'Languages', items: 'Java, Python, Kotlin, JavaScript, PHP' },
+    { area: 'Front end', items: 'React.js, React Native' },
+    { area: 'Mobile', items: 'Android (Kotlin, Jetpack Compose), React Native' },
+    { area: 'Machine learning', items: 'TensorFlow, PyTorch' },
+    { area: 'Data', items: 'MySQL' },
+    { area: 'Process', items: 'Process mapping, workflow diagrams, SOPs' },
     { area: 'Graphics', items: 'Three.js, WebGL, GLSL' },
-    { area: 'Back end', items: 'Node.js, PostgreSQL' },
-    { area: 'Design', items: 'Figma, interface design' },
   ],
   contact: [
     { label: 'Email', value: 'you@example.com', href: 'mailto:you@example.com' },
