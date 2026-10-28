@@ -275,3 +275,6 @@ a.detail-link:hover .ico, a.detail-link.is-hover .ico, .next:hover .ico, .next.i
   *, *::before, *::after { transition-duration: 0.01ms !important; transition-delay: 0s !important; animation: none !important; }
   .scroller { scroll-behavior: auto; }
 }
+
+/* ---------- no WebGL: the drawing set is the whole page ---------- */
+body.no-webgl .titleblock, body.no-webgl .callout, body.no-webgl .back { display: none; }
