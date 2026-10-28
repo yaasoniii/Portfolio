@@ -278,3 +278,4 @@ a.detail-link:hover .ico, a.detail-link.is-hover .ico, .next:hover .ico, .next.i
 
 /* ---------- no WebGL: the drawing set is the whole page ---------- */
 body.no-webgl .titleblock, body.no-webgl .callout, body.no-webgl .back { display: none; }
+.noscript { position: fixed; inset: 0; display: grid; place-items: center; margin: 0; padding: 24px; text-align: center; font-size: 18px; background: var(--page); }
