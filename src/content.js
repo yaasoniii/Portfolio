@@ -12,8 +12,8 @@ export const content = {
   ],
   projects: [
     { title: 'Oshikwanyama language tool', desc: 'An AI-assisted language learning tool for Oshikwanyama, built with deep-learning models.', tags: ['Python', 'TensorFlow', 'PyTorch'], link: '' },
-    { title: "Valentine's Garage", desc: 'An Android fleet management app for a garage, built as a team.', tags: ['Kotlin', 'Jetpack Compose'], link: 'https://github.com/wytee64/valentines-garage' },
-    { title: 'Digital Attendance Register', desc: 'A web-based attendance register that replaces paper sign-in sheets.', tags: ['PHP', 'MySQL'], link: 'https://github.com/yaasoniii/Digital-attendance-register' },
+    { title: "Valentine's Garage", desc: 'An Android fleet management app for a garage.', tags: ['Kotlin', 'Jetpack Compose'], link: 'https://github.com/wytee64/valentines-garage' },
+    { title: 'Digital Attendance Register', desc: 'A digital attendance register system backed by a MySQL database.', tags: ['PHP', 'MySQL'], link: 'https://github.com/yaasoniii/Digital-attendance-register' },
     { title: 'Tic-Tac-Toe AI', desc: 'An unbeatable Tic-Tac-Toe opponent using minimax search with alpha-beta pruning.', tags: ['Python'], link: '' },
     { title: 'This portfolio', desc: 'A real-time 3D drafting studio: procedural materials, ray-marched sun shafts and a baked reflection probe, all in three.js.', tags: ['Three.js', 'WebGL', 'GLSL'], link: 'https://github.com/yaasoniii/Portfolio' },
   ],
