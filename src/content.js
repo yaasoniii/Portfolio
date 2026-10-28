@@ -1,11 +1,11 @@
-// Edit this file to make the portfolio yours. Everything below is placeholder copy.
+// Edit this file to make the portfolio yours. Anything still marked as placeholder below needs real copy.
 // While `draft` is true the drawing set carries a red PRELIMINARY stamp; set it to false once the copy is real.
 // A project with an empty `link` shows "Link to come" instead of a dead link.
 export const content = {
   draft: true,
-  name: 'Your Name',
-  role: 'Creative Developer',
-  tagline: 'I build things for the web: interactive, playful and fast.',
+  name: 'Jason Nghiilwamo',
+  role: 'Software Developer',
+  tagline: 'Final-year Computer Science student at NUST, building mobile, web and machine-learning software.',
   about: [
     'Two or three sentences on what you build and why it matters to you. Recruiters read this first, so lead with the kind of problems you are good at.',
     'Then say what you are looking for next: the role, the team size, the domain, and where you can work.',
