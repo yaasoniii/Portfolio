@@ -7,8 +7,8 @@ export const content = {
   role: 'Software Developer',
   tagline: 'Final-year Computer Science student at NUST, building mobile, web and machine-learning software.',
   about: [
-    'Two or three sentences on what you build and why it matters to you. Recruiters read this first, so lead with the kind of problems you are good at.',
-    'Then say what you are looking for next: the role, the team size, the domain, and where you can work.',
+    'I am a final-year Bachelor of Computer Science student at the Namibia University of Science and Technology (NUST), graduating in 2026. I work across Java, Python, Kotlin and JavaScript, from Android apps to machine-learning tools.',
+    'Alongside my studies I work full-time as a Process Analyst intern at Letshego Holdings Namibia, mapping and documenting business processes and moving into process automation. I am also a co-founder of BDevin, a four-person studio building mobile and web apps.',
   ],
   projects: [
     { title: 'Project title', desc: 'One line on what it does, who it is for, and the hardest technical problem you solved.', tags: ['React', 'Node.js'], link: '' },
