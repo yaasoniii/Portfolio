@@ -5,6 +5,7 @@ export const SHEETS = ['cover', 'about', 'projects', 'skills', 'contact'];
 const META = { cover: ['A-001', 'Cover'], about: ['A-101', 'About'], projects: ['A-201', 'Projects'], skills: ['A-301', 'Skills'], contact: ['A-401', 'Contact'] };
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+const NEW_TAB = '<span class="vh"> (opens in a new tab)</span>';
 const ARROW = '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9.5M8.5 4 12.5 8l-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
 export const isoDate = () => {
   const d = new Date();
@@ -37,12 +38,12 @@ function markup(c) {
     return `<li class="detail">${open}
       <span class="bubble" aria-hidden="true"><b>${i + 1}</b><i>A-201</i></span>
       <span class="detail-body"><h3>${esc(p.title)}</h3><p>${esc(p.desc)}</p><span class="spec">${p.tags.map(esc).join(' / ')}</span></span>
-      <span class="go">${p.link ? `Open${ARROW}` : 'Link to come'}</span>${close}</li>`;
+      <span class="go">${p.link ? `Open${NEW_TAB}${ARROW}` : 'Link to come'}</span>${close}</li>`;
   }).join('');
   const skills = c.skills.map((s) => `<tr><th scope="row">${esc(s.area)}</th><td>${esc(s.items)}</td></tr>`).join('');
   // mail and phone links hand off to an app; opening them in a new tab just leaves a blank one behind
   const external = (href) => /^https?:/i.test(href);
-  const contact = c.contact.map((r) => `<li><span class="k">${esc(r.label)}</span><a href="${esc(r.href)}"${external(r.href) ? ' target="_blank" rel="noopener"' : ''}>${esc(r.value)}${ARROW}</a></li>`).join('');
+  const contact = c.contact.map((r) => `<li><span class="k">${esc(r.label)}</span><a href="${esc(r.href)}"${external(r.href) ? ' target="_blank" rel="noopener"' : ''}>${esc(r.value)}${external(r.href) ? NEW_TAB : ''}${ARROW}</a></li>`).join('');
   const head = (id) => `<header class="sheet-head"><h2>${META[id][1]}</h2><span class="sheet-no">${META[id][0]}</span></header>`;
   return `
   <div class="frame" aria-hidden="true"><i class="ft"></i><i class="fr"></i><i class="fb"></i><i class="fl"></i></div>
