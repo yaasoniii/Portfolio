@@ -40,7 +40,9 @@ function markup(c) {
       <span class="go">${p.link ? `Open${ARROW}` : 'Link to come'}</span>${close}</li>`;
   }).join('');
   const skills = c.skills.map((s) => `<tr><th scope="row">${esc(s.area)}</th><td>${esc(s.items)}</td></tr>`).join('');
-  const contact = c.contact.map((r) => `<li><span class="k">${esc(r.label)}</span><a href="${esc(r.href)}" target="_blank" rel="noopener">${esc(r.value)}${ARROW}</a></li>`).join('');
+  // mail and phone links hand off to an app; opening them in a new tab just leaves a blank one behind
+  const external = (href) => /^https?:/i.test(href);
+  const contact = c.contact.map((r) => `<li><span class="k">${esc(r.label)}</span><a href="${esc(r.href)}"${external(r.href) ? ' target="_blank" rel="noopener"' : ''}>${esc(r.value)}${ARROW}</a></li>`).join('');
   const head = (id) => `<header class="sheet-head"><h2>${META[id][1]}</h2><span class="sheet-no">${META[id][0]}</span></header>`;
   return `
   <div class="frame" aria-hidden="true"><i class="ft"></i><i class="fr"></i><i class="fb"></i><i class="fl"></i></div>
