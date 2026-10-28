@@ -11,10 +11,11 @@ export const content = {
     'Alongside my studies I work full-time as a Process Analyst intern at Letshego Holdings Namibia, mapping and documenting business processes and moving into process automation. I am also a co-founder of BDevin, a four-person studio building mobile and web apps.',
   ],
   projects: [
-    { title: 'Project title', desc: 'One line on what it does, who it is for, and the hardest technical problem you solved.', tags: ['React', 'Node.js'], link: '' },
-    { title: 'This portfolio', desc: 'A real-time 3D drafting studio: procedural materials, ray-marched sun shafts and a baked reflection probe, all in three.js.', tags: ['Three.js', 'WebGL', 'GLSL'], link: '' },
-    { title: 'Project title', desc: 'Name the outcome: what changed for the people who used it.', tags: ['TypeScript'], link: '' },
-    { title: 'Project title', desc: 'Open source, side project or client work. Link the repo or a live demo.', tags: ['Python'], link: '' },
+    { title: 'Oshikwanyama language tool', desc: 'An AI-assisted language learning tool for Oshikwanyama, built with deep-learning models.', tags: ['Python', 'TensorFlow', 'PyTorch'], link: '' },
+    { title: "Valentine's Garage", desc: 'An Android fleet management app for a garage, built as a team.', tags: ['Kotlin', 'Jetpack Compose'], link: 'https://github.com/wytee64/valentines-garage' },
+    { title: 'Digital Attendance Register', desc: 'A web-based attendance register that replaces paper sign-in sheets.', tags: ['PHP', 'MySQL'], link: 'https://github.com/yaasoniii/Digital-attendance-register' },
+    { title: 'Tic-Tac-Toe AI', desc: 'An unbeatable Tic-Tac-Toe opponent using minimax search with alpha-beta pruning.', tags: ['Python'], link: '' },
+    { title: 'This portfolio', desc: 'A real-time 3D drafting studio: procedural materials, ray-marched sun shafts and a baked reflection probe, all in three.js.', tags: ['Three.js', 'WebGL', 'GLSL'], link: 'https://github.com/yaasoniii/Portfolio' },
   ],
   skills: [
     { area: 'Languages', items: 'JavaScript, TypeScript, Python' },
