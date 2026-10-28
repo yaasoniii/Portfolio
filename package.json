@@ -1,6 +1,7 @@
 {
   "name": "portfolio",
   "version": "0.1.0",
+  "description": "Jason Nghiilwamo's portfolio: a real-time 3D drafting studio built with three.js.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -22,5 +23,8 @@
     "vite": "^8.3.4"
   },
   "private": true,
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
 }
