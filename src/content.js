@@ -28,7 +28,7 @@ export const content = {
   ],
   contact: [
     { label: 'Email', value: 'you@example.com', href: 'mailto:you@example.com' },
-    { label: 'GitHub', value: 'github.com/you', href: 'https://github.com/' },
+    { label: 'GitHub', value: 'github.com/yaasoniii', href: 'https://github.com/yaasoniii' },
     { label: 'LinkedIn', value: 'linkedin.com/in/you', href: 'https://linkedin.com/' },
   ],
 };
