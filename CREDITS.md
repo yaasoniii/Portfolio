@@ -1,7 +1,7 @@
 # Credits
 
 3D props in `public/models/` come from the [Khronos glTF Sample Assets](https://github.com/KhronosGroup/glTF-Sample-Assets)
-(textures downscaled to 1024px and re-encoded to WebP to keep the page light).
+(textures downscaled to 1024px and re-encoded to WebP, geometry compressed with meshopt, to keep the page light).
 
 | Model | Author / owner | License |
 |---|---|---|
